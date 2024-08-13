@@ -1,5 +1,6 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
+const AppError = require('./AppError');
 
 async function scrapePage(url) {
     try {
@@ -16,7 +17,10 @@ async function scrapePage(url) {
             description,
         };
     } catch (error) {
-        throw new Error(`Failed to scrape page: ${error.message}`);
+        if (error.response) {
+            throw new AppError(`Failed to scrape page: ${error.response.statusText}`, error.response.status);
+        }
+        throw new AppError(`Failed to scrape page: ${error.message}`, 500);
     }
 }
 
