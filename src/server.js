@@ -1,20 +1,20 @@
 const express = require('express');
 const cors = require('cors');
+const rateLimit = require('express-rate-limit');
 const { scrapePage } = require('./scraper');
+const config = require('./config');
 
 const app = express();
-const port = process.env.PORT || 3000;
-
-const rateLimit = require('express-rate-limit');
-
-const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100 // limit each IP to 100 requests per windowMs
-});
 
 app.use(cors());
-app.use(limiter);
 app.use(express.json());
+
+const limiter = rateLimit({
+    windowMs: config.rateLimitWindowMs,
+    max: config.rateLimitMaxRequests
+});
+
+app.use(limiter);
 
 const { URL } = require('url');
 
@@ -39,6 +39,6 @@ app.post('/scrape', async (req, res) => {
     }
 });
 
-app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
+app.listen(config.port, () => {
+    console.log(`Server running in ${config.nodeEnv} mode on port ${config.port}`);
 });
